@@ -1,0 +1,65 @@
+---
+- name: Docker installation
+  hosts: web
+  gather_facts: false
+  tasks:
+    - name: Remove old docker version
+      apt:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - docker
+        - docker-engine
+        - docker.io
+        - containerd
+        - runc
+
+    - name: Install Required Packages
+      apt:
+        name: "{{ item }}"
+        state: latest
+        update_cache: true
+      loop:
+        - ca-certificates
+        - curl 
+        - gnupg
+        - lsb-release
+        - python3-pip
+        - software-properties-common
+        - python3-setuptools
+    - name: Add directory for gppg key
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        recurse: yes
+        owner: root
+        group: root
+    - name: Add GPG key 
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+    - name: Apt-get update
+      apt:
+        update_cache: true
+
+    - name: Docker Installation
+      apt:
+        name: "{{ item }}"
+        state: latest
+        update_cache: true
+      loop:
+        - docker-ce 
+        - docker-ce-cli 
+        - containerd.io 
+        - docker-compose-plugin
+    - name : add user to docker group
+      user:
+        name: "Username"
+        groups: docker
+        append: yes
+
